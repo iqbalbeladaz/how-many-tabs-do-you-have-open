@@ -11,7 +11,7 @@
 // research, docs, half-read articles and "I'll get back to this" tabs
 // accumulated over weeks. Three digits, one number, no words.
 
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 
 const OUT = "/output/entry.txt";
@@ -31,3 +31,11 @@ if (!/^[0-9]+$/.test(TEXT)) {
 
 mkdirSync(dirname(OUT), { recursive: true });
 writeFileSync(OUT, TEXT, "utf8");
+
+// Self-verify: read the file back and refuse to leave a wrong or
+// trailing-newline entry behind. The gate counts bytes, so an extra
+// newline or stray character would change the entry.
+const written = readFileSync(OUT, "utf8");
+if (written !== TEXT) {
+  throw new Error(`entry.txt holds ${JSON.stringify(written)}, expected ${JSON.stringify(TEXT)}`);
+}
